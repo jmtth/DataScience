@@ -56,7 +56,7 @@ fi
 psql -U "$DB_USER" -d "$DB_NAME" -c "
     CREATE TABLE $table_name (
         product_id integer NOT NULL,
-        category_id bigint NOT NULL,
+        category_id bigint NULL,
         category_code text NULL,
         brand character varying(50) NULL
     );
