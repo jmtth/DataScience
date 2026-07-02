@@ -14,4 +14,4 @@ load_table:
 	docker compose exec -T postgres sh -s -- "$(FILE)" < ../ex02/table.sh
 
 load_automatic_table:
-	docker compose exec -T postgres sh < ../ex03/automatic_table.sh
+	docker compose exec -T postgres sh < ../ex04/items_table.sh
