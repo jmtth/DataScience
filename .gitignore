@@ -1,0 +1,7 @@
+**/pgadmin/**
+**/postgres/**
+data
+.DS_Store
+.env
+customer
+item
