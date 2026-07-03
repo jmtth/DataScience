@@ -55,7 +55,7 @@ fi
 
 psql -U "$DB_USER" -d "$DB_NAME" -c "
     CREATE TABLE $table_name (
-        event_time date NOT NULL,
+        event_time timestamptz NOT NULL,
         event_type character(50) NOT NULL,
         product_id integer NOT NULL,
         price real NOT NULL,
