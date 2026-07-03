@@ -8,7 +8,7 @@ DB_NAME="${DB_NAME:-piscineds}"
 # Valeur par défaut du fichier CSV à importer
 # sinon, utilisez le premier argument passé au script
 file="${1:-item.csv}"
-table_name="$(basename "$file" .csv)"
+table_name="items"
 csv_path="$CSV_DIR/$file"
 
 case "$file" in
