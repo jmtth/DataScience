@@ -170,3 +170,14 @@ The important part of these exercises is not only starting PostgreSQL. The real 
 - use the database schema to make assumptions about the data visible.
 
 At this stage, the scripts use predefined schemas for the expected CSV files. That is simpler and safer than guessing column types automatically, especially while learning how PostgreSQL imports work.
+
+## Day 2: Data Warehouse
+
+### Exercise 00: PostgreSQL Container
+
+Reuse the PostgreSQL container from Day 1. 
+The database is already running and can be used for the next exercises.
+
+### Exercise 01: Join/concatenate all the data
+
+Simple sql query to join all the data from the different tables `data_202*_***` into one table `customers`.
