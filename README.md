@@ -181,3 +181,81 @@ The database is already running and can be used for the next exercises.
 ### Exercise 01: Join/concatenate all the data
 
 Simple sql query to join all the data from the different tables `data_202*_***` into one table `customers`.
+
+**command to run the query:**
+
+```bash
+docker exec -i postgres psql -U jhervoch -d piscineds < customers_table.sql  
+```
+
+
+### Exercise 02: Remove duplicates
+
+Complexe sql query to remove duplicates from the `customers` table based on the columns `event_time`, `event_type`, `product_id`, `price`, `user_id`, and `user_session`. The query uses the `LAG` function to compare each row with the previous one and delete duplicates that occur within a 1-second interval.
+
+**command to run the query:**
+
+```bash
+docker exec -i postgres psql -U jhervoch -d piscineds < remove_duplicates.sql
+```
+
+```sql
+CREATE TABLE customers_clean AS
+SELECT
+    event_time,
+    event_type,
+    product_id,
+    price,
+    user_id,
+    user_session
+FROM (
+    SELECT
+        *,
+        LAG(event_time) OVER (
+            PARTITION BY event_type, product_id, price, user_id, user_session
+            ORDER BY event_time
+        ) AS previous_event_time
+    FROM customers
+) t
+WHERE previous_event_time IS NULL
+   OR event_time - previous_event_time > INTERVAL '1 second';
+
+DROP TABLE customers;
+
+ALTER TABLE customers_clean RENAME TO customers;
+
+
+-------------------------------------------------------------------
+
+--OLD VERSION OF THE QUERY took 5 minutes to run on 16 million rows,
+--the new version takes 44 seconds to run on the same dataset.
+
+-------------------------------------------------------------------
+
+-- Remove duplicate rows from the customers table based 
+-- on event_time, event_type, product_id, price, user_id, and user_session.
+-- for same instruction with 1 second interval.
+DELETE FROM customers
+-- ctid is a unique identifier for each row in a PostgreSQL table, 
+--which can be used to identify and delete specific rows,
+-- when there'isnt primary key in the table.
+WHERE ctid IN (
+    SELECT ctid
+    FROM (
+        SELECT
+            ctid,
+            -- LAG function is used to access data from the previous row in the result set,
+            -- based on the specified ordering of event_time.
+            -- PARTITION BY clause is used to group the rows based on the specified columns,
+            -- so that the LAG function can be applied within each group separately.
+            LAG(event_time) OVER (
+                PARTITION BY event_type, product_id, price, user_id, user_session
+                ORDER BY event_time
+            ) AS previous_event_time,
+            event_time
+        FROM customers
+    ) t
+    WHERE previous_event_time IS NOT NULL
+      AND event_time - previous_event_time <= INTERVAL '1 second'
+);
+```
