@@ -58,7 +58,7 @@ psql -U "$DB_USER" -d "$DB_NAME" -c "
         product_id integer NOT NULL,
         category_id bigint NULL,
         category_code text NULL,
-        brand character varying(50) NULL
+        brand varchar(100) NULL
     );
 "
 

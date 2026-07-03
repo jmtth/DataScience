@@ -47,9 +47,9 @@ for file in "$CSV_DIR"/*.csv; do
     psql -U "$DB_USER" -d "$DB_NAME" -c "
         CREATE TABLE $table_name (
             event_time timestamptz NOT NULL,
-            event_type character(50) NOT NULL,
+            event_type varchar(50) NOT NULL,
             product_id integer NOT NULL,
-            price real NOT NULL,
+            price numeric NOT NULL,
             user_id bigint NOT NULL,
             user_session uuid
         );
