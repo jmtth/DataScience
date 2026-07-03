@@ -6,3 +6,4 @@ data
 customer
 item
 *.csv
+*.zip

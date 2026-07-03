@@ -20,8 +20,8 @@ Each day focuses on a different step of the data workflow. The first day starts 
 
 ```text
 .
-├── Data engineer/   Day 1 exercises
-└── Data WareHouse/  Day 2 exercises
+|-- Data engineer/   Day 1 exercises
+`-- Data WareHouse/  Day 2 exercises
 ```
 
 Other days will be added as the piscine progresses.
@@ -49,11 +49,11 @@ This is the base of a data engineering workflow: collect data, define a schema, 
 
 ```text
 Data engineer/
-├── ex00/  PostgreSQL container
-├── ex01/  PostgreSQL with Adminer, pgAdmin, persistence, and CSV data mounts
-├── ex02/  Single customer CSV import script
-├── ex03/  Batch customer CSV import script
-└── ex04/  Item CSV import script
+|-- ex00/  PostgreSQL container
+|-- ex01/  PostgreSQL with Adminer, pgAdmin, persistence, and CSV data mounts
+|-- ex02/  Single customer CSV import script
+|-- ex03/  Batch customer CSV import script
+`-- ex04/  Item CSV import script
 ```
 
 ### Exercises
@@ -173,89 +173,106 @@ At this stage, the scripts use predefined schemas for the expected CSV files. Th
 
 ## Day 2: Data Warehouse
 
-### Exercise 00: PostgreSQL Container
+The second day moves from raw imports to warehouse preparation.
 
-Reuse the PostgreSQL container from Day 1. 
-The database is already running and can be used for the next exercises.
+The goal is to take the tables loaded during Day 1, combine them into cleaner analytical tables, remove duplicated events, and enrich customer events with product information.
 
-### Exercise 01: Join/concatenate all the data
+### Focus
 
-Simple sql query to join all the data from the different tables `data_202*_***` into one table `customers`.
+Day 2 covers:
 
-**command to run the query:**
+- reusing the PostgreSQL environment from Day 1;
+- grouping monthly customer event tables into one `customers` table;
+- removing near-duplicate customer events;
+- cleaning item metadata before joining it with customer events;
+- building a better table for analysis.
 
-```bash
-docker exec -i postgres psql -U jhervoch -d piscineds < customers_table.sql  
+This is the beginning of a warehouse workflow: raw data is transformed into tables that are easier to query, compare, and analyze.
+
+### Day 2 Structure
+
+```text
+Data WareHouse/
+|-- ex00/  PostgreSQL environment and import scripts
+|-- ex01/  Build the customers table
+|-- ex02/  Remove duplicate customer events
+`-- ex03/  Join customers with item metadata
 ```
 
+### Exercises
 
-### Exercise 02: Remove duplicates
+#### Exercise 00: Reuse the PostgreSQL Environment
 
-Complexe sql query to remove duplicates from the `customers` table based on the columns `event_time`, `event_type`, `product_id`, `price`, `user_id`, and `user_session`. The query uses the `LAG` function to compare each row with the previous one and delete duplicates that occur within a 1-second interval.
+`ex00` keeps the same PostgreSQL, Adminer, and pgAdmin setup used during Day 1.
 
-**command to run the query:**
+The Makefile provides shortcuts to start the containers and load the CSV files:
 
-```bash
+```sh
+make run
+make load_data FILE=data_2022_dec.csv
+make load_automatic_table
+make load_items_table
+```
+
+This keeps the warehouse exercises focused on SQL transformations instead of repeating the container setup.
+
+#### Exercise 01: Build the Customers Table
+
+`ex01/customers_table.sql` creates a single `customers` table from the monthly customer event tables.
+
+It uses `UNION ALL` to keep every row from:
+
+- `data_2022_oct`
+- `data_2022_nov`
+- `data_2022_dec`
+- `data_2023_jan`
+
+Run it from `Data WareHouse/ex01`:
+
+```sh
+docker exec -i postgres psql -U jhervoch -d piscineds < customers_table.sql
+```
+
+#### Exercise 02: Remove Duplicate Events
+
+`ex02/remove_duplicates.sql` removes duplicated events from the `customers` table.
+
+The query compares each event with the previous event in the same group using `LAG`. Events are considered duplicates when they share the same event data and occur within one second of each other.
+
+Instead of deleting rows one by one from the original table, the script creates a clean version, drops the old table, and renames the clean table back to `customers`. This is easier to reason about and faster on large datasets (44 secondes instead of 5 minutes for 16 millions rows).
+
+Run it from `Data WareHouse/ex02`:
+
+```sh
 docker exec -i postgres psql -U jhervoch -d piscineds < remove_duplicates.sql
 ```
 
-```sql
-CREATE TABLE customers_clean AS
-SELECT
-    event_time,
-    event_type,
-    product_id,
-    price,
-    user_id,
-    user_session
-FROM (
-    SELECT
-        *,
-        LAG(event_time) OVER (
-            PARTITION BY event_type, product_id, price, user_id, user_session
-            ORDER BY event_time
-        ) AS previous_event_time
-    FROM customers
-) t
-WHERE previous_event_time IS NULL
-   OR event_time - previous_event_time > INTERVAL '1 second';
+#### Exercise 03: Join Customers and Items
 
-DROP TABLE customers;
+`ex03/fusion.sql` enriches the `customers` table with product information from the `items` table.
 
-ALTER TABLE customers_clean RENAME TO customers;
+Before the join, it creates `items_clean` by keeping one row per `product_id` and preferring rows with more complete metadata. Then it joins `customers` with `items_clean` on `product_id` and replaces the old `customers` table with the enriched version.
 
+The final `customers` table contains the original event columns plus:
 
--------------------------------------------------------------------
+- `category_id`
+- `category_code`
+- `brand`
 
---OLD VERSION OF THE QUERY took 5 minutes to run on 16 million rows,
---the new version takes 44 seconds to run on the same dataset.
+Run it from `Data WareHouse/ex03`:
 
--------------------------------------------------------------------
-
--- Remove duplicate rows from the customers table based 
--- on event_time, event_type, product_id, price, user_id, and user_session.
--- for same instruction with 1 second interval.
-DELETE FROM customers
--- ctid is a unique identifier for each row in a PostgreSQL table, 
---which can be used to identify and delete specific rows,
--- when there'isnt primary key in the table.
-WHERE ctid IN (
-    SELECT ctid
-    FROM (
-        SELECT
-            ctid,
-            -- LAG function is used to access data from the previous row in the result set,
-            -- based on the specified ordering of event_time.
-            -- PARTITION BY clause is used to group the rows based on the specified columns,
-            -- so that the LAG function can be applied within each group separately.
-            LAG(event_time) OVER (
-                PARTITION BY event_type, product_id, price, user_id, user_session
-                ORDER BY event_time
-            ) AS previous_event_time,
-            event_time
-        FROM customers
-    ) t
-    WHERE previous_event_time IS NOT NULL
-      AND event_time - previous_event_time <= INTERVAL '1 second'
-);
+```sh
+docker exec -i postgres psql -U jhervoch -d piscineds < fusion.sql
 ```
+
+### Data Warehouse Notes
+
+Day 2 changes the mindset from "load files into PostgreSQL" to "prepare tables for analysis".
+
+The important ideas are:
+
+- raw monthly tables are useful for import, but not convenient for analysis;
+- `UNION ALL` keeps the original event volume when building the warehouse table;
+- duplicate removal should be deterministic and based on clear business rules;
+- enrichment joins should clean dimension-like tables first, especially when one `product_id` can appear several times;
+- replacing intermediate tables with clean final tables makes the next exercises easier to query.
