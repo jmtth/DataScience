@@ -6,4 +6,3 @@ data
 customer
 item
 *.csv
-*.sql
