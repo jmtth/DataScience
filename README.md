@@ -124,7 +124,7 @@ It follows the same pattern as the customer import scripts, but uses a schema ad
 - `category_code`
 - `brand`
 
-### Useful Commands
+#### Useful Commands
 
 Start the main environment from `Data engineer/ex01`:
 
@@ -157,6 +157,17 @@ sh table.sh
 sh automatic_table.sh
 sh items_table.sh
 ```
+
+#### Data types used
+
+| Field | Data type | use case |
+| --- | --- | --- |
+| `event_time` | `timestamptz` | Stores the exact date and time of an event while accounting for its time zone. This makes chronological comparisons reliable across different locations. |
+| `event_type` | `varchar(50)` | Stores short textual event names such as `view`, `cart`, `remove_from_cart`, or `purchase`. The length limit prevents unexpectedly large values while allowing new event types. |
+| `product_id` | `integer` | Stores a numeric product identifier. A 32-bit integer provides sufficient range while using less storage than a `bigint`. |
+| `price` | `numeric` | Stores monetary values with exact decimal precision and avoids the rounding errors associated with floating-point types. |
+| `user_id` | `bigint` | Stores user identifiers that may exceed the maximum value supported by a standard 32-bit integer. |
+| `user_session` | `uuid` | Stores session identifiers in their native UUID format, providing validation and more efficient storage than a text representation. The column is nullable because some events may not be associated with a session. |
 
 ### Data Engineering Notes
 
@@ -265,6 +276,7 @@ Run it from `Data WareHouse/ex03`:
 docker exec -i postgres psql -U jhervoch -d piscineds < fusion.sql
 ```
 
+
 ### Data Warehouse Notes
 
 Day 2 changes the mindset from "load files into PostgreSQL" to "prepare tables for analysis".
@@ -276,3 +288,4 @@ The important ideas are:
 - duplicate removal should be deterministic and based on clear business rules;
 - enrichment joins should clean dimension-like tables first, especially when one `product_id` can appear several times;
 - replacing intermediate tables with clean final tables makes the next exercises easier to query.
+

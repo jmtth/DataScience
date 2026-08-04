@@ -2,7 +2,7 @@
 services:
   postgres:
     image: postgres:18
-    user: "${USER_ID:-1000}:${GROUP_ID:-1000}"
+    user: "${USER_ID}:${GROUP_ID}"
     container_name: postgres
     networks:
       - piscineds
@@ -31,7 +31,7 @@ services:
 
   pgadmin:
     image: dpage/pgadmin4
-    user: "0:0"
+    user: "${USER_ID}:${GROUP_ID}"
     container_name: pgadmin
     depends_on:
       - postgres
