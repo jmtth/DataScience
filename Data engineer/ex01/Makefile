@@ -3,6 +3,7 @@ USER_ID := $(shell id -u)
 GROUP_ID := $(shell id -g)
 export USER_ID
 export GROUP_ID
+COMPOSE = USER_ID=$(USER_ID) GROUP_ID=$(GROUP_ID) docker compose
 
 help:
 	@echo "Usage: make [target]"
@@ -15,25 +16,25 @@ help:
 	@echo "  load_items_table    Load items table from items_table.sh into PostgreSQL"
 
 run: setup
-	docker-compose up -d
+	$(COMPOSE) up -d
 
 setup:
 	mkdir -p data/postgres data/pgadmin
 
 load_data:
-	docker compose exec -T postgres sh -s -- "$(FILE)" < import_data.sh
+	$(COMPOSE) exec -T postgres sh -s -- "$(FILE)" < import_data.sh
 	
 load_table:
-	docker compose exec -T postgres sh -s -- "$(FILE)" < ../ex02/table.sh
+	$(COMPOSE) exec -T postgres sh -s -- "$(FILE)" < ../ex02/table.sh
 
 load_automatic_table:
-	docker compose exec -T postgres sh < ../ex03/automatic_table.sh
+	$(COMPOSE) exec -T postgres sh < ../ex03/automatic_table.sh
 
 load_items_table:
-	docker compose exec -T postgres sh < ../ex04/items_table.sh
+	$(COMPOSE) exec -T postgres sh < ../ex04/items_table.sh
 
 clean:
-	docker-compose down -v
+	$(COMPOSE) down -v
 	rm -rf data/postgres data/pgadmin
 
 .PHONY: help run setup load_data load_table load_automatic_table load_items_table clean
