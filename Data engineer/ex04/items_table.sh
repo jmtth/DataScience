@@ -1,9 +1,11 @@
 #!/bin/sh
 set -eu
 
-CSV_DIR="${CSV_DIR:-/data/item}"
+CSV_DIR="${CSV_DIR:-/data/subject/item}"
 DB_USER="${DB_USER:-jhervoch}"
 DB_NAME="${DB_NAME:-piscineds}"
+DB_PASSWORD="${POSTGRES_PASSWORD}"
+export PGPASSWORD="$DB_PASSWORD"
 
 # Valeur par défaut du fichier CSV à importer
 # sinon, utilisez le premier argument passé au script

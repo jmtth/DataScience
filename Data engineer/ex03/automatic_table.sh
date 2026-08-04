@@ -1,9 +1,11 @@
 #!/bin/sh
 set -eu
 
-CSV_DIR="${CSV_DIR:-/data/customer}"
+CSV_DIR="${CSV_DIR:-/data/subject/customer}"
 DB_USER="${DB_USER:-jhervoch}"
 DB_NAME="${DB_NAME:-piscineds}"
+DB_PASSWORD="${POSTGRES_PASSWORD}"
+export PGPASSWORD="$DB_PASSWORD"
 
 if [ ! -d "$CSV_DIR" ]; then
     echo "Directory $CSV_DIR does not exist, nothing to import."

@@ -11,7 +11,7 @@ help:
 	@echo "  load_items_table    Load items table from items_table.sh into PostgreSQL"
 
 run: setup
-	docker-compose up -d
+	USER_ID=$(id -u) GROUP_ID=$(id -g) docker-compose up -d
 
 setup:
 	mkdir -p data/postgres data/pgadmin
