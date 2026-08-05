@@ -164,6 +164,7 @@ sh items_table.sh
 | --- | --- | --- |
 | `event_time` | `timestamptz` | Stores the exact date and time of an event while accounting for its time zone. This makes chronological comparisons reliable across different locations. |
 | `event_type` | `varchar(50)` | Stores short textual event names such as `view`, `cart`, `remove_from_cart`, or `purchase`. The length limit prevents unexpectedly large values while allowing new event types. |
+||`char(50)`|Stores fixed-length data and complete by spaces if necessarry.|
 | `product_id` | `integer` | Stores a numeric product identifier. A 32-bit integer provides sufficient range while using less storage than a `bigint`. |
 | `price` | `numeric` | Stores monetary values with exact decimal precision and avoids the rounding errors associated with floating-point types. |
 | `user_id` | `bigint` | Stores user identifiers that may exceed the maximum value supported by a standard 32-bit integer. |
@@ -232,7 +233,7 @@ This keeps the warehouse exercises focused on SQL transformations instead of rep
 `ex01/customers_table.sql` creates a single `customers` table from the monthly customer event tables.
 
 It uses `UNION ALL` to keep every row from:
-
+> each table need to have the same columns and compatible data types, so that they can be combined into a single table. The `UNION ALL` operator is used instead of `UNION` to retain all rows, including duplicates, which is important for accurate analysis of customer events.
 - `data_2022_oct`
 - `data_2022_nov`
 - `data_2022_dec`
@@ -263,6 +264,8 @@ docker exec -i postgres psql -U jhervoch -d piscineds < remove_duplicates.sql
 `ex03/fusion.sql` enriches the `customers` table with product information from the `items` table.
 
 Before the join, it creates `items_clean` by keeping one row per `product_id` and preferring rows with more complete metadata. Then it joins `customers` with `items_clean` on `product_id` and replaces the old `customers` table with the enriched version.
+
+It trims the `category_code` and `brand` columns to remove trailing spaces, which are common in fixed-length `char` columns. And replace null values with default ones with `NULLIF`. This makes the values easier to compare and group.
 
 The final `customers` table contains the original event columns plus:
 
