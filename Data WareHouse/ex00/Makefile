@@ -1,35 +1,46 @@
+-include .env
+export
+
 FILE ?= data_2022_dec.csv
-export USER_ID
-export GROUP_ID
-COMPOSE = USER_ID=$(USER_ID) GROUP_ID=$(GROUP_ID) docker compose
+COMPOSE = docker compose
 
 help:
 	@echo "Usage: make [target]"
 	@echo "Targets:"
-	@echo "  run                 Start the Docker containers"
-	@echo "  setup               Create necessary directories for data"
-	@echo "  load_data           Load data from import_data.sh into PostgreSQL"
-	@echo "  load_table          Load table from table.sh into PostgreSQL"
+	@echo "  run                  Start the Docker containers"
+	@echo "  setup                Create necessary directories for data"
+	@echo "  load_data            Load all data from CSV files into PostgreSQL"
 	@echo "  load_automatic_table Load automatic table from automatic_table.sh into PostgreSQL"
-	@echo "  load_items_table    Load items table from items_table.sh into PostgreSQL"
+	@echo "  load_items_table     Load items table from items_table.sh into PostgreSQL"
+	@echo "  create_customers     Create customers table from customers_table.sql"
+	@echo "  fclean               Stop and remove Docker containers and volumes, and clean up data directory"
+	@echo "  help                 Show this help message"
 
 run: setup
 	$(COMPOSE) up -d
 
 setup:
-	mkdir -p data/postgres data/pgadmin
+	mkdir -p data
 
-load_data:
-	$(COMPOSE) exec -T postgres sh -s -- "$(FILE)" < import_data.sh
-
+load_data: load_automatic_table load_items_table
+	
 load_automatic_table:
 	$(COMPOSE) exec -T postgres sh < automatic_table.sh
 
 load_items_table:
 	$(COMPOSE) exec -T postgres sh < items_table.sh
 
-clean:
-	$(COMPOSE) down -v
-	rm -rf data/postgres data/pgadmin
+create_customers:
+	$(COMPOSE) exec -T postgres psql -U $(POSTGRES_USER) -d $(POSTGRES_DB) < ../ex01/customers_table.sql
 
-.PHONY: help run setup load_data load_automatic_table load_items_table clean
+remove_duplicates:
+	$(COMPOSE) exec -T postgres psql -U $(POSTGRES_USER) -d $(POSTGRES_DB) < ../ex02/remove_duplicates.sql
+
+fusion:
+	$(COMPOSE) exec -T postgres psql -U $(POSTGRES_USER) -d $(POSTGRES_DB) < ../ex03/fusion.sql
+
+fclean:
+	$(COMPOSE) down -v
+	rm -rf data
+
+.PHONY: help run setup load_data load_automatic_table load_items_table remove_duplicates fusion fclean 

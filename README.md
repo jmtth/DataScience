@@ -221,9 +221,7 @@ The Makefile provides shortcuts to start the containers and load the CSV files:
 
 ```sh
 make run
-make load_data FILE=data_2022_dec.csv
-make load_automatic_table
-make load_items_table
+make load_data
 ```
 
 This keeps the warehouse exercises focused on SQL transformations instead of repeating the container setup.
@@ -256,7 +254,7 @@ Instead of deleting rows one by one from the original table, the script creates 
 Run it from `Data WareHouse/ex02`:
 
 ```sh
-docker exec -i postgres psql -U jhervoch -d piscineds < remove_duplicates.sql
+docker exec -i postgres psql -U jhervoch -d piscineds < ../ex02/remove_duplicates.sql
 ```
 
 #### Exercise 03: Join Customers and Items
@@ -276,7 +274,7 @@ The final `customers` table contains the original event columns plus:
 Run it from `Data WareHouse/ex03`:
 
 ```sh
-docker exec -i postgres psql -U jhervoch -d piscineds < fusion.sql
+docker exec -i postgres psql -U jhervoch -d piscineds < ../ex03/fusion.sql
 ```
 
 

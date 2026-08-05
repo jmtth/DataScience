@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 
-CSV_DIR="${CSV_DIR:-/data/customer}"
+CSV_DIR="${CSV_DIR:-/data/subject/customer}"
 DB_USER="${DB_USER:-jhervoch}"
 DB_NAME="${DB_NAME:-piscineds}"
 
@@ -24,7 +24,7 @@ for file in "$CSV_DIR"/*.csv; do
             ;;
         *)
             echo "Invalid CSV file name: $filename" >&2
-            exit 1
+            continue
             ;;
     esac
 
@@ -33,7 +33,7 @@ for file in "$CSV_DIR"/*.csv; do
             ;;
         *)
             echo "Invalid table name: $table_name" >&2
-            exit 1
+            continue
             ;;
     esac
 

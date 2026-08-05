@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 
-CSV_DIR="${CSV_DIR:-/data/item}"
+CSV_DIR="${CSV_DIR:-/data/subject/item}"
 DB_USER="${DB_USER:-jhervoch}"
 DB_NAME="${DB_NAME:-piscineds}"
 
