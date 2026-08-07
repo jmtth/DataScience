@@ -39,6 +39,9 @@ remove_duplicates:
 fusion:
 	$(COMPOSE) exec -T postgres psql -U $(POSTGRES_USER) -d $(POSTGRES_DB) < ../ex03/fusion.sql
 
+data_warehouse: create_customers remove_duplicates fusion
+	
+
 fclean:
 	$(COMPOSE) down -v
 	rm -rf data
