@@ -109,3 +109,36 @@ markersize: size of the marker.
 "x"  # cross
 "D"  # large diamond
 "."  # small point
+
+
+### ex03 / chart Building
+
+I use `matplotlib` to create a chart.
+The goal is to format the chart to make it more readable and visually appealing.
+For this i use :
+- `df_frequency["frequency"].quantile(0.95)` to get the 95th percentile of the frequency column, so that we can set the x-axis limit to this value.
+- `/10 * 10` to round to the nearest 10.
+- center and edges for bins.
+```python
+def centered_bins(series, bin_width=50, quantile=0.95):
+    upper_value = series.quantile(quantile)
+
+    max_center = np.ceil(upper_value / bin_width) * bin_width
+
+    centers = np.arange(
+        0,
+        max_center + bin_width,
+        bin_width
+    )
+
+    edges = np.arange(
+        centers[0] - bin_width / 2,
+        centers[-1] + bin_width,
+        bin_width
+    )
+
+    return edges, centers
+````
+
+
+

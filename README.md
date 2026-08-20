@@ -290,3 +290,87 @@ The important ideas are:
 - enrichment joins should clean dimension-like tables first, especially when one `product_id` can appear several times;
 - replacing intermediate tables with clean final tables makes the next exercises easier to query.
 
+## Day 3: Data Analyst
+
+The third day focuses on analyzing the cleaned and enriched `customers` table.
+
+The goal is to to understand past and present data to make graph to explains the numbers to teams
+
+
+### Focus
+
+Day 3 covers:
+- using Jupiter Notebook tool for data analysis and visualization;
+- creating SQL queries to extract data from the `customers` table;
+- using Python and Pandas to manipulate the data;
+- using Matplotlib to create visualizations.
+
+### Day 2 Structure
+
+```text
+Data Analyst/
+|-- ex00/  
+|-- ex01/  
+|-- ex02/  
+`-- ex03/  
+```
+
+### Exercises
+
+I use a notebook for each exercise.
+I use sqlalchemy to connect to the database and pandas to manipulate the data.
+
+```python
+engine = create_engine(
+    f"postgresql+psycopg2://{P_USER}:{P_PWD}@localhost:5432/{P_DB}"
+)
+
+query = """
+SELECT event_type, COUNT(event_type) as count
+FROM customers
+GROUP BY event_type;
+"""
+df_customers = pd.read_sql_query(query, engine)
+```
+
+#### Exercise 00 : American apple pie
+
+The first exercise is to create a pie chart to visualize the distribution of event types in the `customers` table.
+
+```python
+plt.figure(figsize=(8, 8))
+plt.pie(
+    df_customers["count"],
+    labels=df_customers["event_type"],
+    autopct="%1.1f%%"
+)
+plt.axis("equal")  # garantit un cercle
+plt.tight_layout()
+plt.show()
+```
+
+#### Exercise 01 : Initial data exploration
+
+The second exercise is to create a chart to visualize the number of unique customers per day and the total sales per month.
+The goal is to understand the data and identify trends or patterns.
+- First graph is a line chart `ax.plot` to visualize the number of unique customers per day.
+I use `matplotlib` to create a bar chart.
+I have learned to use `ax.xaxis.set_major_formatter(mdates.DateFormatter("%b"))` to format the x-axis labels to show only the month abbreviation. `%b` is the format code for month abbreviation.
+- Second graph is a bar chart `ax.bar` to visualize the total sales per month.
+I have learned to use 
+ - `DATE_TRUNC('month', event_time)` to truncate the event_time to the first day of the month, so that we can group by month.
+ - `pd.to_datetime` to convert the month column to datetime type and `dt.strftime("%b")`, so that we can use the dt accessor to extract the month abbreviation.
+- Third graph is a stack line `ax.stackplot` chart to visualize the total sales per month.
+I have learned `event_time::date` to extract only de date with out timestamp in sql query.
+
+#### Exercise 02 : My beautiful mustache
+
+#### Exercise 03 : Highest Building
+| Displayed center | Actual interval |
+|---|---|
+|   0 ₳ |  [-25 ; 25[  |
+|  50 ₳ |  [25 ; 75[   |
+| 100 ₳ |  [75 ; 125[  |
+| 150 ₳ |  [125 ; 175[ |
+| 200 ₳ |  [175 ; 225] |
+
