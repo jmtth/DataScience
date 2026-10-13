@@ -9,6 +9,9 @@ SELECT
 FROM (
     SELECT
         *,
+        -- Use LAG to get the previous event_time for each row, partitioned by 
+        -- event_type, product_id, price, user_id, and user_session,
+        -- and ordered by event_time
         LAG(event_time) OVER (
             PARTITION BY event_type, product_id, price, user_id, user_session
             ORDER BY event_time

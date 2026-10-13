@@ -13,6 +13,8 @@ help:
 	@echo "  load_automatic_table Load automatic table from automatic_table.sh into PostgreSQL"
 	@echo "  load_items_table     Load items table from items_table.sh into PostgreSQL"
 	@echo "  create_customers     Create customers table from customers_table.sql"
+	@echo "  remove_duplicates    Remove duplicates from customers table using remove_duplicates.sql"
+	@echo "  fusion               Create data warehouse from fusion.sql"
 	@echo "  fclean               Stop and remove Docker containers and volumes, and clean up data directory"
 	@echo "  help                 Show this help message"
 

@@ -1,3 +1,5 @@
+This project has been created as part of the 42 curriculum by jhervoch.
+
 # DataScience
 
 This repository contains my work for the 42 Data Science piscine.
