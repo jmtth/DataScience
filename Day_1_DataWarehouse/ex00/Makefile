@@ -46,4 +46,4 @@ fclean:
 	$(COMPOSE) down -v
 	rm -rf data
 
-.PHONY: help run setup load_data load_automatic_table load_items_table remove_duplicates fusion fclean 
+.PHONY: help run setup load_data load_automatic_table load_items_table create_customers remove_duplicates fusion  data_warehouse fclean 
