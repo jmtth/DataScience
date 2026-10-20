@@ -17,16 +17,16 @@ services:
       - ./data:/data:ro
     restart: always
 
-  adminer:
-    image: adminer
-    container_name: adminer
-    depends_on:
-      - postgres
-    networks:
-      - piscineds
-    restart: always
-    ports:
-      - 8080:8080
+  # adminer:
+  #   image: adminer
+  #   container_name: adminer
+  #   depends_on:
+  #     - postgres
+  #   networks:
+  #     - piscineds
+  #   restart: always
+  #   ports:
+  #     - 8080:8080
 
   pgadmin:
     image: dpage/pgadmin4
